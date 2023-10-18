@@ -25,9 +25,12 @@ ENV \
 RUN set -eux \
   && apt-get update && apt-get upgrade -y \
   && apt-get install --no-install-recommends -y \
-    tini \
+    tini git \
+  && pip install -U pip ; pip install pipenv \
+  && pip install git+https://github.com/thmsklndr/iot-utils.git@main#egg=iot_utils \
   && apt-get purge -y \
-  && apt-get clean -y && rm -rf /var/lib/apt/lists/*
+  && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false git \
+  && apt-get clean -y && rm -rf /var/lib/apt/lists/* 
 
 RUN bash -c 'export _gid=$(test -z $GID && shuf -i 10000-65534 -n 1 || echo $GID) && \
              export _uid=$(test -z $UID && shuf -i 10000-65534 -n 1 || echo $UID) && \

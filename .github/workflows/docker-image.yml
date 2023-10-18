@@ -6,13 +6,45 @@ on:
   pull_request:
     branches: [ "main" ]
 
+env:
+  PYTHON_VERSION: "3.10"
+
 jobs:
 
   build:
+    strategy:
+      fail-fast: true
 
-    runs-on: ubuntu-22.04
-
+    runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+    - uses: actions/checkout@v4
+
+    - name: vars
+      run: |
+        echo "TIMAGE_TAG=$(date '+%Y%m%d')" >> "$GITHUB_ENV"
+        echo "TIMAGE_NAME=python-${{env.PYTHON_VERSION}}"  >> "$GITHUB_ENV"
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    # - name: debug
+    #   run: |
+    #     echo ${{ secrets.DOCKERHUB_USER }}
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+      with:
+        username: ${{ secrets.DOCKERHUB_USER }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile
+        push: true
+        tags: thmsklndr/python-3.10:latest
+        platforms: linux/amd64,linux/arm64
+
