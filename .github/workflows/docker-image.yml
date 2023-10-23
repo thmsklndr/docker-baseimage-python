@@ -6,14 +6,16 @@ on:
   pull_request:
     branches: [ "main" ]
 
-env:
-  PYTHON_VERSION: "3.10"
+#env:
+#  PYTHON_VERSION: "3.10"
 
 jobs:
 
   build:
     strategy:
       fail-fast: true
+      matrix:
+        python-version: ["3.8" , "3.10"] #, "3.11"]
 
     runs-on: ubuntu-latest
     steps:
@@ -22,7 +24,7 @@ jobs:
     - name: vars
       run: |
         echo "TIMAGE_TAG=$(date '+%Y%m%d')" >> "$GITHUB_ENV"
-        echo "TIMAGE_NAME=python-${{env.PYTHON_VERSION}}"  >> "$GITHUB_ENV"
+        echo "TIMAGE_NAME=python-${{ matrix.python-version }}"  >> "$GITHUB_ENV"
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
@@ -42,9 +44,10 @@ jobs:
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
       with:
+        build-args: python_version=${{ matrix.python-version }}
         context: .
         file: ./Dockerfile
         push: true
-        tags: thmsklndr/python-3.10:latest
+        tags: thmsklndr/python-${{ matrix.python-version }}:latest
         platforms: linux/amd64,linux/arm64
 
