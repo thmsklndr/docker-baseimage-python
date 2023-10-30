@@ -18,8 +18,10 @@ ENV \
   # PATH \
   PATH=/app/.venv/bin:$PATH \
   # PYTHONPATH \
-  PYTHONPATH=/app
-
+  PYTHONPATH=/app \
+  # POETRY \
+  POETRY_VIRTUALENVS_CREATE=true \
+  POETRY_VIRTUALENVS_IN_PROJECT=true
 
 RUN set -eux \
   && apt-get update && apt-get upgrade -y \
